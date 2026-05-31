@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Allamiro Renhold – Planleggingssystem</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --border: #d9e2ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 28px 40px;
+    }
+
+    header h1 { margin: 0 0 6px; font-size: 30px; }
+    header p { margin: 0; opacity: 0.9; }
+
+    main {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 20px 40px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-button {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .tab-button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card, .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    .stat-card h3 {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .stat-card strong {
+      font-size: 28px;
+      color: var(--primary-dark);
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2 { margin: 0; }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      background: white;
+    }
+
+    textarea { min-height: 80px; resize: vertical; }
+
+    .full { grid-column: 1 / -1; }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .primary { background: var(--primary); color: white; }
+    .secondary { background: #e8eef8; color: var(--primary-dark); }
+    .danger { background: #fee2e2; color: var(--danger); }
+    .success { background: #dcfce7; color: var(--success); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: white;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th { background: #eef4ff; color: var(--primary-dark); }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eef4ff;
+      color: var(--primary-dark);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .message-box {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 12px;
+      padding: 14px;
+      white-space: pre-wrap;
+      margin-top: 12px;
+    }
+
+    .help-text {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      form { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 22px; }
+      .grid { grid-template-columns: 1fr; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Allamiro Renhold</h1>
+    <p>Prototype for planlegging, kunder, ansatte og oppdrag</p>
+  </header>
+
+  <main>
+    <nav class="tabs">
+      <button class="tab-button active" onclick="showSection('dashboard')">Dashboard</button>
+      <button class="tab-button" onclick="showSection('customers')">Kunder</button>
+      <button class="tab-button" onclick="showSection('employees')">Ansatte</button>
+      <button class="tab-button" onclick="showSection('jobs')">Oppdrag</button>
+      <button class="tab-button" onclick="showSection('requests')">Kundeforespørsler</button>
+      <button class="tab-button" onclick="showSection('messages')">Meldinger</button>
+    </nav>
+
+    <section id="dashboard" class="section active">
+      <div class="grid">
+        <div class="stat-card"><h3>Kunder</h3><strong id="customerCount">0</strong></div>
+        <div class="stat-card"><h3>Ansatte</h3><strong id="employeeCount">0</strong></div>
+        <div class="stat-card"><h3>Oppdrag</h3><strong id="jobCount">0</strong></div>
+        <div class="stat-card"><h3>Nye forespørsler</h3><strong id="requestCount">0</strong></div>
+      </div>
+      <div class="card">
+        <h2>Om systemet</h2>
+        <p>Dette er en enkel MVP/prototype laget for en liten renholdsbedrift. Løsningen viser hvordan bedriften kan få bedre oversikt over faste kunder, ansatte, arbeidsplan og nye kundehenvendelser.</p>
+        <p class="help-text">Data lagres lokalt i nettleseren med localStorage. Dette er egnet for demonstrasjon, men vil bli erstattet med database i en ferdig produksjonsversjon.</p>
+      </div>
+    </section>
+
+    <section id="customers" class="section">
+      <div class="card">
+        <div class="section-title"><h2>Kundeoversikt</h2></div>
+        <form id="customerForm">
+          <label>Navn <input id="customerName" required /></label>
+          <label>Telefon/e-post <input id="customerContact" required /></label>
+          <label>Adresse <input id="customerAddress" required /></label>
+          <label>Avtaletype
+            <select id="customerFrequency">
+              <option>Ukentlig</option>
+              <option>Annenhver uke</option>
+              <option>Månedlig</option>
+              <option>Engangsoppdrag</option>
+            </select>
+          </label>
+          <button class="primary full" type="submit">Legg til kunde</button>
+        </form>
+        <table><thead><tr><th>Navn</th><th>Kontakt</th><th>Adresse</th><th>Avtale</th><th>Handling</th></tr></thead><tbody id="customerTable"></tbody></table>
+      </div>
+    </section>
+
+    <section id="employees" class="section">
+      <div class="card">
+        <div class="section-title"><h2>Ansattoversikt</h2></div>
+        <form id="employeeForm">
+          <label>Navn <input id="employeeName" required /></label>
+          <label>Telefon/e-post <input id="employeeContact" required /></label>
+          <label>Rolle <input id="employeeRole" value="Renholder" /></label>
+          <label>Status
+            <select id="employeeStatus">
+              <option>Aktiv</option>
+              <option>Ikke aktiv</option>
+            </select>
+          </label>
+          <button class="primary full" type="submit">Legg til ansatt</button>
+        </form>
+        <table><thead><tr><th>Navn</th><th>Kontakt</th><th>Rolle</th><th>Status</th><th>Handling</th></tr></thead><tbody id="employeeTable"></tbody></table>
+      </div>
+    </section>
+
+    <section id="jobs" class="section">
+      <div class="card">
+        <div class="section-title"><h2>Arbeidsplan / Oppdrag</h2></div>
+        <form id="jobForm">
+          <label>Kunde <select id="jobCustomer" required></select></label>
+          <label>Ansatt <select id="jobEmployee" required></select></label>
+          <label>Dato <input id="jobDate" type="date" required /></label>
+          <label>Tidspunkt <input id="jobTime" type="time" required /></label>
+          <label>Timer <input id="jobHours" type="number" min="1" step="0.5" value="2" /></label>
+          <label>Status
+            <select id="jobStatus">
+              <option>Planlagt</option>
+              <option>Fullført</option>
+              <option>Avlyst</option>
+            </select>
+          </label>
+          <label class="full">Notat <textarea id="jobNote" placeholder="Eksempel: vanlig vask, flyttevask, nøkkelinfo..."></textarea></label>
+          <button class="primary full" type="submit">Legg til oppdrag</button>
+        </form>
+        <table><thead><tr><th>Dato</th><th>Kunde</th><th>Ansatt</th><th>Timer</th><th>Status</th><th>Notat</th><th>Handling</th></tr></thead><tbody id="jobTable"></tbody></table>
+      </div>
+    </section>
+
+    <section id="requests" class="section">
+      <div class="card">
+        <div class="section-title"><h2>Kundeforespørsler</h2></div>
+        <p class="help-text">Dette simulerer et enkelt skjema nye kunder kan bruke for å sende forespørsel til bedriften.</p>
+        <form id="requestForm">
+          <label>Navn <input id="requestName" required /></label>
+          <label>Kontakt <input id="requestContact" required /></label>
+          <label>Adresse <input id="requestAddress" required /></label>
+          <label>Type oppdrag
+            <select id="requestType">
+              <option>Rengjøring</option>
+              <option>Flyttevask</option>
+              <option>Fast avtale</option>
+              <option>Annet</option>
+            </select>
+          </label>
+          <label class="full">Beskrivelse <textarea id="requestDescription" required></textarea></label>
+          <button class="primary full" type="submit">Send forespørsel</button>
+        </form>
+        <table><thead><tr><th>Navn</th><th>Kontakt</th><th>Adresse</th><th>Type</th><th>Beskrivelse</th><th>Handling</th></tr></thead><tbody id="requestTable"></tbody></table>
+      </div>
+    </section>
+
+    <section id="messages" class="section">
+      <div class="card">
+        <div class="section-title"><h2>Meldingsgenerator</h2></div>
+        <p class="help-text">Prototype for å redusere manuelt meldingsarbeid. Systemet genererer tekst som kan kopieres til SMS, Messenger eller e-post.</p>
+        <form id="messageForm">
+          <label>Kunde <select id="messageCustomer" required></select></label>
+          <label>Oppdrag <select id="messageJob" required></select></label>
+          <label>Meldingstype
+            <select id="messageType">
+              <option>Bekreftelse</option>
+              <option>Påminnelse</option>
+              <option>Endring</option>
+            </select>
+          </label>
+          <button class="primary full" type="submit">Generer melding</button>
+        </form>
+        <div id="generatedMessage" class="message-box" style="display:none"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const storageKey = 'allamiro-renhold-mvp';
+    let state = JSON.parse(localStorage.getItem(storageKey)) || {
+      customers: [
+        { id: crypto.randomUUID(), name: 'Eksempel Kunde', contact: 'kunde@example.no', address: 'Stasjonsveien 15A', frequency: 'Ukentlig' }
+      ],
+      employees: [
+        { id: crypto.randomUUID(), name: 'Eksempel Ansatt', contact: 'ansatt@example.no', role: 'Renholder', status: 'Aktiv' }
+      ],
+      jobs: [],
+      requests: []
+    };
+
+    function save() {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      render();
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function render() {
+      document.getElementById('customerCount').textContent = state.customers.length;
+      document.getElementById('employeeCount').textContent = state.employees.length;
+      document.getElementById('jobCount').textContent = state.jobs.length;
+      document.getElementById('requestCount').textContent = state.requests.length;
+
+      document.getElementById('customerTable').innerHTML = state.customers.map(c => `
+        <tr><td>${c.name}</td><td>${c.contact}</td><td>${c.address}</td><td><span class="badge">${c.frequency}</span></td>
+        <td><button class="danger" onclick="removeItem('customers','${c.id}')">Slett</button></td></tr>
+      `).join('');
+
+      document.getElementById('employeeTable').innerHTML = state.employees.map(e => `
+        <tr><td>${e.name}</td><td>${e.contact}</td><td>${e.role}</td><td><span class="badge">${e.status}</span></td>
+        <td><button class="danger" onclick="removeItem('employees','${e.id}')">Slett</button></td></tr>
+      `).join('');
+
+      fillSelect('jobCustomer', state.customers, 'Velg kunde');
+      fillSelect('jobEmployee', state.employees, 'Velg ansatt');
+      fillSelect('messageCustomer', state.customers, 'Velg kunde');
+      fillSelect('messageJob', state.jobs.map(j => ({ id: j.id, name: `${getName(state.customers, j.customerId)} – ${j.date} ${j.time}` })), 'Velg oppdrag');
+
+      document.getElementById('jobTable').innerHTML = state.jobs.map(j => `
+        <tr><td>${j.date} ${j.time}</td><td>${getName(state.customers, j.customerId)}</td><td>${getName(state.employees, j.employeeId)}</td>
+        <td>${j.hours}</td><td><span class="badge">${j.status}</span></td><td>${j.note || ''}</td>
+        <td class="actions"><button class="success" onclick="setJobDone('${j.id}')">Fullfør</button><button class="danger" onclick="removeItem('jobs','${j.id}')">Slett</button></td></tr>
+      `).join('');
+
+      document.getElementById('requestTable').innerHTML = state.requests.map(r => `
+        <tr><td>${r.name}</td><td>${r.contact}</td><td>${r.address}</td><td>${r.type}</td><td>${r.description}</td>
+        <td class="actions"><button class="secondary" onclick="convertRequest('${r.id}')">Lag kunde</button><button class="danger" onclick="removeItem('requests','${r.id}')">Slett</button></td></tr>
+      `).join('');
+    }
+
+    function fillSelect(id, items, placeholder) {
+      const select = document.getElementById(id);
+      select.innerHTML = `<option value="">${placeholder}</option>` + items.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+    }
+
+    function getName(list, id) {
+      return (list.find(item => item.id === id) || {}).name || 'Ukjent';
+    }
+
+    function removeItem(type, id) {
+      if (!confirm('Er du sikker på at du vil slette?')) return;
+      state[type] = state[type].filter(item => item.id !== id);
+      save();
+    }
+
+    function setJobDone(id) {
+      const job = state.jobs.find(j => j.id === id);
+      if (job) job.status = 'Fullført';
+      save();
+    }
+
+    function convertRequest(id) {
+      const req = state.requests.find(r => r.id === id);
+      if (!req) return;
+      state.customers.push({ id: crypto.randomUUID(), name: req.name, contact: req.contact, address: req.address, frequency: 'Engangsoppdrag' });
+      state.requests = state.requests.filter(r => r.id !== id);
+      save();
+      alert('Forespørsel er gjort om til kunde.');
+    }
+
+    document.getElementById('customerForm').addEventListener('submit', e => {
+      e.preventDefault();
+      state.customers.push({
+        id: crypto.randomUUID(),
+        name: customerName.value,
+        contact: customerContact.value,
+        address: customerAddress.value,
+        frequency: customerFrequency.value
+      });
+      e.target.reset();
+      save();
+    });
+
+    document.getElementById('employeeForm').addEventListener('submit', e => {
+      e.preventDefault();
+      state.employees.push({
+        id: crypto.randomUUID(),
+        name: employeeName.value,
+        contact: employeeContact.value,
+        role: employeeRole.value,
+        status: employeeStatus.value
+      });
+      e.target.reset();
+      employeeRole.value = 'Renholder';
+      save();
+    });
+
+    document.getElementById('jobForm').addEventListener('submit', e => {
+      e.preventDefault();
+      state.jobs.push({
+        id: crypto.randomUUID(),
+        customerId: jobCustomer.value,
+        employeeId: jobEmployee.value,
+        date: jobDate.value,
+        time: jobTime.value,
+        hours: jobHours.value,
+        status: jobStatus.value,
+        note: jobNote.value
+      });
+      e.target.reset();
+      jobHours.value = 2;
+      save();
+    });
+
+    document.getElementById('requestForm').addEventListener('submit', e => {
+      e.preventDefault();
+      state.requests.push({
+        id: crypto.randomUUID(),
+        name: requestName.value,
+        contact: requestContact.value,
+        address: requestAddress.value,
+        type: requestType.value,
+        description: requestDescription.value
+      });
+      e.target.reset();
+      save();
+    });
+
+    document.getElementById('messageForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const customer = state.customers.find(c => c.id === messageCustomer.value);
+      const job = state.jobs.find(j => j.id === messageJob.value);
+      if (!customer || !job) return;
+
+      let intro = 'Hei ' + customer.name + '!';
+      let body = '';
+      if (messageType.value === 'Bekreftelse') {
+        body = `Vi bekrefter renholdsoppdrag hos deg ${job.date} kl. ${job.time}.`;
+      } else if (messageType.value === 'Påminnelse') {
+        body = `Dette er en påminnelse om renholdsoppdraget ditt ${job.date} kl. ${job.time}.`;
+      } else {
+        body = `Vi ønsker å informere om en endring knyttet til oppdraget ditt ${job.date} kl. ${job.time}.`;
+      }
+      const message = `${intro}\n\n${body}\n\nVennlig hilsen\nAllamiro Renhold`;
+      generatedMessage.style.display = 'block';
+      generatedMessage.textContent = message;
+    });
+
+    render();
+  </script>
+</body>
+</html>
