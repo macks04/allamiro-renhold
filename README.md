@@ -108,4 +108,4 @@ Repository created for version control and project documentation during developm
 Bachelor project developed by:
 
 * Maksim Kurakin
-* Lukas
+* Lukas Dahl Thoresen
