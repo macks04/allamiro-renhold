@@ -235,6 +235,13 @@
         <p>Dette er en enkel MVP/prototype laget for en liten renholdsbedrift. Løsningen viser hvordan bedriften kan få bedre oversikt over faste kunder, ansatte, arbeidsplan og nye kundehenvendelser.</p>
         <p class="help-text">Data lagres lokalt i nettleseren med localStorage. Dette er egnet for demonstrasjon, men vil bli erstattet med database i en ferdig produksjonsversjon.</p>
       </div>
+
+      <div class="card">
+        <h2>Backend-demo</h2>
+        <p class="help-text">Henter kundedata fra Spring Boot API koblet til PostgreSQL.</p>
+        <button class="primary" onclick="fetchBackendCustomers()">Hent kunder fra backend</button>
+        <div id="backendCustomers" class="message-box" style="display:none"></div>
+      </div>
     </section>
 
     <section id="customers" class="section">
@@ -510,6 +517,34 @@
       generatedMessage.textContent = message;
     });
 
+
+    async function fetchBackendCustomers() {
+    const box = document.getElementById('backendCustomers');
+
+    box.style.display = 'block';
+    box.textContent = 'Henter data fra backend...';
+
+    try {
+        const response = await fetch('http://localhost:8080/api/customers');
+
+        const customers = await response.json();
+
+        if (!customers.length) {
+            box.textContent = 'Ingen kunder funnet i databasen.';
+            return;
+        }
+
+        box.textContent = customers
+            .map(c =>
+                `${c.name} | ${c.contact} | ${c.address} | ${c.agreementType}`
+            )
+            .join('\n');
+
+    } catch (error) {
+        box.textContent =
+            'Kunne ikke hente data fra backend. Sjekk at Spring Boot kjører.';
+    }
+    }
     render();
   </script>
 </body>
